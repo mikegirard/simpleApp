@@ -1,0 +1,140 @@
+swagger: '2.0'
+info:
+  title: Simple Application
+  description: Simple REST app to test service deployment
+  version: "0.0.1-SNAPSHOT"
+# the domain of the service
+host: readytalk.com
+# array of all schemes that your API supports
+schemes:
+  - http
+# will be prefixed to all paths
+basePath: /
+produces:
+  - application/json
+paths:
+  /status:
+    get:
+      summary: Current service status
+      description: |
+        Dummy status response.
+      tags:
+        - status
+      responses:
+        200:
+          description: Current service start time and health
+          schema:
+            $ref: '#/definitions/Status'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /game:
+    get:
+      summary: List all games on the home schedule
+      description: |
+        The Schedule endpoint returns a list of all games on the Rockies home schedule
+      tags:
+        - schedule
+      responses:
+        200:
+          description: An array of Games.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Game'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /game/today:
+    get:
+      summary: Returns today's game object
+      description: |
+        The Schedule/today endpoint returns the game scheduled to be played today
+      tags:
+        - schedule
+      responses:
+        200:
+          description: today's game
+          schema:
+            $ref: '#/definitions/Game'
+        404:
+          description: No game today
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: No game today
+          schema:
+            $ref: '#/definitions/Error'
+  /game/next:
+    get:
+      summary: Next scheduled game
+      description: The Next Scheduled Games enpoint will return an array of Games based on the current day (includes games that start on the current day). Number of elements depends on parameter passed. If no games, then an empty list is returned
+      parameters:
+        - name: num
+          in: query
+          description: Number of upcoming games to return.
+          required: true
+          type: number
+          format: integer
+      responses:
+        200: 
+          description: Next scheduled game(s), including today's
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Game'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+          
+definitions:
+  Status:
+    type: object
+    properties:
+      startTime:
+        type: string
+        format: date-time
+        description: Timestamp for when service started
+      currentTime:
+        type: string
+        format: date-time
+        description: current server time
+      status:
+        type: string
+        description: current service status
+  Error:
+    type: object
+    properties:
+      timestamp:
+        type: string
+        format: date-time
+      status:
+        type: integer
+        description: HTTP response code
+      error:
+        type: string
+      message:
+        type: string
+        description: Error message specific to the request
+      exception:
+        type: string
+        description: underlying server exception type
+      path:
+        type: string
+        description: path of original request
+  Game:
+    type: object
+    properties:
+      title:
+        type: string
+        description: Game title and opponent
+      location:
+        type: string
+        description: Game location
+      startDateTime:
+        type: string
+        format: date-time
+        description: Game start time
